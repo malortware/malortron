@@ -3,6 +3,8 @@ from pymongo import MongoClient
 
 discord_token = os.environ.get("DISCORD_TOKEN")
 mongodb_connection = os.environ.get("MONGODB_URI", "mongodb://localhost")
+maintainer_id = os.environ.get("MAINTAINER_ID")
+github_repo = os.environ.get("GITHUB_REPO", "https://github.com/NullPxl/NullCTF")
 
 client = MongoClient(mongodb_connection)
 

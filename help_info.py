@@ -73,18 +73,17 @@ for the truth.
 '''
 
 
+# Disable CTF functions until we can build something that works for us...
+# `>help ctftime`
+# info for all ctftime commands
+# `>help ctf`
+# info for all ctf commands
+# `>help config`
+# bot configuration info
+
 help_page = '''
-`>help ctftime`
-info for all ctftime commands
-`>help ctf`
-info for all ctf commands
-`>help config`
-bot configuration info
 `>help utility`
-everything else! (basically misc)
-`>report/request "an issue or feature"`
-report an issue, or request a feature for NullCTF, if it is helpful your name will be added to the 'cool names' list!
+utility functions for data mangling + everything else!
+`>[report/request] "an issue or feature"`
+report an issue, or request a feature for {bot} [NullCTF], if it is helpful your name will be added to the 'cool names' list!
 '''
-
-
-src = "https://github.com/NullPxl/NullCTF"

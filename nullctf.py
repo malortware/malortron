@@ -17,8 +17,7 @@ async def on_ready():
     print(f"{bot.user.name} - Online")
     print(f"discord.py {discord.__version__}\n")
     print("-------------------------------")
-
-    await bot.change_presence(activity=discord.Game(name=">help | >report \"x\""))
+    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="you.. >help"))
 
 @bot.command()
 async def help(ctx, page=None):
@@ -37,14 +36,15 @@ async def help(ctx, page=None):
         emb.set_author(name='Utilities Help')
     
     else:
-        emb = discord.Embed(description=help_info.help_page, colour=4387968)
-        emb.set_author(name='NullCTF Help')
+        bot_name = bot.user.name
+        emb = discord.Embed(description=help_info.help_page.format(bot=bot_name), colour=4387968)
+        emb.set_author(name='{} Help'.format(bot_name.title()))
     
     await ctx.channel.send(embed=emb)
 
 @bot.command()
 async def source(ctx):
-    await ctx.send(help_info.src)
+    await ctx.send(config_vars.github_repo)
 
 @bot.event
 async def on_command_error(ctx, error):
@@ -63,7 +63,7 @@ async def on_command_error(ctx, error):
 @bot.command()
 async def request(ctx, feature):
     # Bot sends a dm to creator with the name of the user and their request.
-    creator = await bot.fetch_user(230827776637272064)
+    creator = await bot.fetch_user(config_vars.maintainer_id)
     authors_name = str(ctx.author)
     await creator.send(f''':pencil: {authors_name}: {feature}''')
     await ctx.send(f''':pencil: Thanks, "{feature}" has been requested!''')
@@ -71,7 +71,7 @@ async def request(ctx, feature):
 @bot.command()
 async def report(ctx, error_report):
     # Bot sends a dm to creator with the name of the user and their report.
-    creator = await bot.fetch_user(230827776637272064)
+    creator = await bot.fetch_user(config_vars.maintainer_id)
     authors_name = str(ctx.author)
     await creator.send(f''':triangular_flag_on_post: {authors_name}: {error_report}''')
     await ctx.send(f''':triangular_flag_on_post: Thanks for the help, "{error_report}" has been reported!''')
