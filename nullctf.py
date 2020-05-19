@@ -9,7 +9,7 @@ client = discord.Client()
 bot = commands.Bot(command_prefix=">")
 bot.remove_command('help')
 
-extensions = ['ctf', 'ctftime', 'configuration', 'encoding', 'cipher', 'utility']
+extensions = ['encoding', 'cipher', 'utility'] #'ctf', 'ctftime', 'configuration',
 cool_names = ['nullpxl', 'Yiggles', 'JohnHammond', 'voidUpdate', 'Michel Ney', 'theKidOfArcrania', 'l14ck3r0x01', 'hasu', 'KFBI', 'mrFu', 'warlock_rootx', 'd347h4ck'] 
 
 @bot.event
