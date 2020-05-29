@@ -10,9 +10,8 @@ import config_vars
 
 client = discord.Client()
 bot = commands.Bot(command_prefix=">")
-bot.remove_command('help')
 
-extensions = ['encoding', 'cipher', 'utility'] #'ctf', 'ctftime', 'configuration',
+extensions = ['ctf', 'encoding', 'cipher', 'utility'] # 'ctftime', 'configuration',
 cool_names = ['nullpxl', 'Yiggles', 'JohnHammond', 'voidUpdate', 'Michel Ney', 'theKidOfArcrania', 'l14ck3r0x01', 'hasu', 'KFBI', 'mrFu', 'warlock_rootx', 'd347h4ck'] 
 
 @bot.event
@@ -21,29 +20,6 @@ async def on_ready():
     print(f"discord.py {discord.__version__}\n")
     print("-------------------------------")
     await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="you.. >help"))
-
-@bot.command()
-async def help(ctx, page=None):
-    
-    if page == 'ctftime':
-        emb = discord.Embed(description=help_info.ctftime_help, colour=4387968)
-        emb.set_author(name='CTFTime Help')
-    elif page == 'ctf':
-        emb = discord.Embed(description=help_info.ctf_help, colour=4387968)
-        emb.set_author(name='CTF Help')
-    elif page == 'config':
-        emb = discord.Embed(description=help_info.config_help, colour=4387968)
-        emb.set_author(name='Configuration Help')
-    elif page == 'utility':
-        emb = discord.Embed(description=help_info.utility_help, colour=4387968)
-        emb.set_author(name='Utilities Help')
-    
-    else:
-        bot_name = bot.user.name
-        emb = discord.Embed(description=help_info.help_page.format(bot=bot_name), colour=4387968)
-        emb.set_author(name='{} Help'.format(bot_name.title()))
-    
-    await ctx.channel.send(embed=emb)
 
 @bot.command()
 async def source(ctx):
@@ -59,9 +35,10 @@ async def on_command_error(ctx, error):
         await ctx.send("You do not have the appropriate permissions to run this command.")
     if isinstance(error, commands.BotMissingPermissions):
         await ctx.send("I don't have sufficient permissions!")
+    if isinstance(error, commands.MissingRole):
+        await ctx.send("You don't have the appropriate role to run this command")
     else:
-        print("error not caught")
-        print(error)
+        await ctx.send(error)
 
 @bot.command()
 async def request(ctx, feature):
