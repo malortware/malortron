@@ -1,7 +1,10 @@
 import os
 import logging
+import hashlib
 
 from pymodm import MongoModel, EmbeddedMongoModel, fields, connect
+from pymongo.operations import IndexModel
+from errors import NotFound
 import config_vars
 
 connect(config_vars.mongodb_connection)
@@ -20,15 +23,17 @@ class Challenge(EmbeddedMongoModel):
     name = fields.CharField(required=True)
     created_at = fields.DateTimeField(required=True)
     tags = fields.ListField(fields.CharField(), default=[], blank=True)
-    attempted_by = fields.ListField(fields.CharField(), default=[])
+    attempted_by = fields.ListField(fields.CharField(), default=[], blank=True)
+    working_on = fields.ListField(fields.CharField(), default=[], blank=True)
     solved_at = fields.DateTimeField(blank=True)
     solved_by = fields.ListField(fields.CharField(), default=[], blank=True)
     notebook_url = fields.CharField(default="", blank=True)
-    flag = fields.CharField()
+    flag = fields.CharField(blank=True)
 
 
 class CTFModel(MongoModel):
     name = fields.CharField(required=True)
+    guild_id = fields.IntegerField()
     category_id = fields.IntegerField()
     role_id = fields.IntegerField()
     description = fields.CharField()
@@ -41,6 +46,7 @@ class CTFModel(MongoModel):
     password = fields.CharField()
     challenges = fields.EmbeddedDocumentListField(Challenge, default=[], blank=True)
     pending_reminders = fields.ListField(blank=True, default=[])
+    tags = fields.ListField(fields.CharField(), default=[], blank=True)
 
     def status(self, members_joined_count):
 
@@ -69,27 +75,55 @@ class CTFModel(MongoModel):
             response += f"\n\nLogin Here: {self.url}"
         return response
     
-    def get_challenge(self, name):
-        return next((c for c in self.challenges if c.name == name), None)
+    def get_chal_hash(self, name):
+        return hashlib.sha1(f'{self.category_id}{name}'.encode()).hexdigest()[:7]
 
-    def challenge_summary(self):
-        if not self.challenges:
-            return "No challenges found. Adding one with `>challenge add <name> <category>`"
+    def get_challenge(self, name):
+        challenge = next((c for c in self.challenges if c.name == name or self.get_chal_hash(c.name) == name), None)
+        if not challenge:
+            raise NotFound("Challenge not found.")
+        return challenge
+        # return next((c for c in self.challenges if c.name == name or self.get_chal_hash(c.name) == name), None)
+
+    def challenge_summary(self, category):
+        if len(self.challenges) == 0:
+            raise NotFound("No challenges found. Add one with `>challenge add <name> <category>`")
 
         solved_response, unsolved_response = "", ""
 
-        for challenge in sorted(self.challenges, key=lambda c: c.solved_at or c.created_at):
-            challenge_details = f'**[{challenge.name}]**'
+        challenges = self.challenges
+        if category and category != 'all':
+            challenges = filter(lambda c: category in c.tags, challenges)
+        challenges = sorted(challenges, key=lambda c: (c.tags, c.name, c.solved_at or c.created_at))
+
+        for challenge in challenges:
+            chal_hash = self.get_chal_hash(challenge.name)
+            challenge_details = f'[{chal_hash} :: {challenge.name}]'
+            notes_url = f'[notes]({challenge.notebook_url})'
+            flag = f'{{{challenge.flag or ""}}}'
+            tags = ",".join(challenge.tags)
+
             if challenge.solved_at:
-                solved_response += f'{challenge_details} solved by: {", ".join(challenge.solved_by)}\n'
+                solved_response += f'> {challenge_details}({tags}) <{",".join(challenge.solved_by)}> {flag}\n'
             else:
-                unsolved_response += f'{challenge_details} attempted by: {", ".join(challenge.attempted_by)}\n'
-        
-        summary = (
-            f"\\>>> Solved :white_check_mark: \n{solved_response}" + f"\\>>> Unsolved :thinking:\n{unsolved_response}"
-        )
-        return summary
+                if len(challenge.working_on) > 0:
+                    unsolved_response += f'* {challenge_details}({tags}) <{",".join(challenge.working_on)}> {flag}\n'
+                else:
+                    unsolved_response += f'< {challenge_details}({tags}) < -- > {flag}\n'
+
+        return solved_response, unsolved_response
 
     class Meta:
         collection_name = "ctf"
         ignore_unknown_fields = True
+        indexes = [
+            IndexModel([('guild_id', 1), ('name', 1)], unique=True),
+            IndexModel([('guild_id', 1), ('category_id', 1)], unique=True)
+        ]
+
+
+class User(MongoModel):
+    user_id = fields.IntegerField(primary_key=True, required=True)
+    name = fields.CharField(required=True)
+    ctfs = fields.ListField(fields.ReferenceField(CTFModel, on_delete=fields.ReferenceField.PULL), default=[])
+    current_ctf = fields.ReferenceField(CTFModel, blank=True, on_delete=fields.ReferenceField.NULLIFY)

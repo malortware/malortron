@@ -26,18 +26,20 @@ async def source(ctx):
     await ctx.send(config_vars.github_repo)
 
 @bot.event
-async def on_command_error(ctx, error):
-    if isinstance(error, commands.CommandNotFound):
-        return
-    if isinstance(error, commands.MissingRequiredArgument):
-        await ctx.send("Missing a required argument.  Do >help")
-    if isinstance(error, commands.MissingPermissions):
-        await ctx.send("You do not have the appropriate permissions to run this command.")
-    if isinstance(error, commands.BotMissingPermissions):
-        await ctx.send("I don't have sufficient permissions!")
-    if isinstance(error, commands.MissingRole):
-        await ctx.send("You don't have the appropriate role to run this command")
+async def on_command_error(ctx: commands.Context, error):
+    if isinstance(error, commands.UserInputError):
+        await ctx.send_help(ctx.command)
+    # elif isinstance(error, commands.MissingPermissions):
+    #     await ctx.send("You do not have the appropriate permissions to run this command.")
+    # elif isinstance(error, commands.BotMissingPermissions):
+    #     await ctx.send("I don't have sufficient permissions!")
+    # elif isinstance(error, commands.MissingRole):
+    #     await ctx.send("You don't have the appropriate role to run this command")
     else:
+        try:
+            error = error.original
+        except AttributeError:
+            pass
         await ctx.send(error)
 
 @bot.command()
