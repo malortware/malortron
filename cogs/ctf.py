@@ -94,6 +94,21 @@ class CTF(commands.Cog):
 
         return await ctx.bot.wait_for('message', timeout=timeout, check=check)
 
+    async def announce(self, ctx:commands.Context, ctf, message, channels, public=False):
+        ctf_category = ctx.bot.get_channel(ctf.category_id)
+
+        await ctx.send(message)
+
+        for channel in channels:
+            channel = discord.utils.get(ctf_category.channels, name=f"{ctf.name}_{channel}")
+            if channel and ctx.channel != channel:
+                await channel.send(message)
+
+        if public:
+            public_channel = discord.utils.get(ctf_category.guild.channels, name="general")
+            if public_channel:
+                await public_channel.send(f"{message} for {ctf.name} ctf")
+
     @commands.Cog.listener()
     @commands.bot_has_permissions(manage_roles=True)
     async def on_guild_join(self, guild: discord.Guild):
@@ -308,7 +323,8 @@ class CTF(commands.Cog):
         ctf.challenges.append(new_challenge)
         ctf.save()
 
-        await ctx.send(f"`{name}` added to the challenge list for `{ctf.name}`")
+        message = f"`{name}` added to the challenge list for `{ctf.name}`"
+        await self.announce(ctx, ctf, message, new_challenge.tags)
 
     @challenge.command(aliases=["notes", "i"])
     async def info(self, ctx: commands.Context, name):
@@ -360,7 +376,8 @@ class CTF(commands.Cog):
         if not category in challenge.tags:
             challenge.tags.append(category)
             ctf.save()
-            await ctx.send(f"Added `{category}` tag to `{challenge.name}`")
+            message = f"{ctx.author.mention} added `{category}` tag to `{challenge.name}`"
+            await self.announce(ctx, ctf, message, challenge.tags)
         else:
             await ctx.send(f"`{challenge.name}` already tagged with `{category}`")
 
@@ -375,7 +392,7 @@ class CTF(commands.Cog):
         if category in challenge.tags:
             challenge.tags.remove(category)
             ctf.save()
-            await ctx.send(f"Removed `{category}` tag from `{challenge.name}`")
+            await ctx.send(f"{ctx.author.mention} removed `{category}` tag from `{challenge.name}`")
         else:
             await ctx.send(f"`{challenge.name}` doesn't have tag `{category}`")
 
@@ -399,15 +416,10 @@ class CTF(commands.Cog):
         ctf.save()
 
         solvers_str = ", ".join([s.mention for s in solvers])
-        await ctx.send(f":triangular_flag_on_post: `{challenge.name}` has been solved by {solvers_str}")
+        message = f":triangular_flag_on_post: `{challenge.name}` has been solved by {solvers_str}"
+        await self.announce(ctx, ctf, message, challenge.tags + ['general'], public=True)
 
-        # general_channel = discord.utils.get(
-        #     ctx.channel.category.channels, name=f"{ctf.name}_general"
-        # )
 
-        # await general_channel.send(
-        #     f"{solvers_str} solved the {name} challenge! :candy: :candy:"
-        # )
 
     @challenge.command(aliases=['w', 'working'])
     async def start(self, ctx, name):
@@ -425,7 +437,8 @@ class CTF(commands.Cog):
                 challenge.attempted_by.append(user.name)
             ctf.save()
 
-        await ctx.send(f"{user.mention} is working on `{challenge.name}`!")
+        message = (f"{user.mention} is working on `{challenge.name}`!")
+        await self.announce(ctx, ctf, message, challenge.tags)
 
     @challenge.command(aliases=['down'])
     async def stop(self, ctx, name):
@@ -441,7 +454,8 @@ class CTF(commands.Cog):
             challenge.working_on.remove(user.name)
             ctf.save()
 
-        await ctx.send(f"{user.mention} stopped working on `{challenge.name}`")
+        message = (f"{user.mention} stopped working on `{challenge.name}`")
+        await self.announce(ctx, ctf, message, challenge.tags)
 
     @challenge.command()
     async def afk(self, ctx):
@@ -462,7 +476,8 @@ class CTF(commands.Cog):
 
         ctf.save()
 
-        await ctx.send(f"{user.mention} stopped working on `{', '.join(chal_names)}`")
+        message = (f"{user.mention} stopped working on `{', '.join(chal_names)}`")
+        self.announce(ctx, ctf, message, ['general'])
 
     @challenge.command(aliases=['r', 'rm', 'delete', 'd'])
     async def remove(self, ctx, name):
