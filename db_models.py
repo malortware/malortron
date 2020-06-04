@@ -7,7 +7,7 @@ from pymongo.operations import IndexModel
 from errors import NotFound
 import config_vars
 
-connect(config_vars.mongodb_connection)
+connect(f"{config_vars.mongodb_connection}?retryWrites=false")
 
 # class BotConfig(object):
 #     ANNOUNCEMENTS_CHANNEL = fields.IntegerField()
