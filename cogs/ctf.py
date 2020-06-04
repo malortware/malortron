@@ -82,9 +82,9 @@ class CTF(commands.Cog):
         channel_name = f"{ctf.name}_{category}"
 
         if not discord.utils.get(ctf_category.channels, name=channel_name):
-            tags = sorted(ctf.tags + [category])
-            position = tags.index(category) + len(default_channels)
-            channel = await ctf_category.create_text_channel(channel_name, position=position)
+            # tags = sorted(ctf.tags + [category])
+            # position = tags.index(category) + len(default_channels)
+            channel = await ctf_category.create_text_channel(channel_name)
             await ctx.send(f"Created new channel: {channel.mention}")
 
     async def prompt(self, ctx:commands.Context, message, timeout=10):
