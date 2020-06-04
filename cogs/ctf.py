@@ -419,7 +419,23 @@ class CTF(commands.Cog):
         message = f":triangular_flag_on_post: `{challenge.name}` has been solved by {solvers_str}"
         await self.announce(ctx, ctf, message, challenge.tags + ['general'], public=True)
 
+    @challenge.command(aliases=['us'])
+    async def unsolve(self, ctx, name):
+        """
+        Mark a challenge as unsolved.
+        """
+        ctf = self._get_ctf(ctx)
+        challenge = ctf.get_challenge(name)
 
+        if not challenge.solved_at:
+            raise Exception(f"Challenge `{challenge.name}` hasn't been solved")
+
+        challenge.solved_by = []
+        challenge.solved_at = None
+        challenge.flag = f"*unsolved* {challenge.flag}"
+        ctf.save()
+
+        await ctx.send(f"`{challenge.name}` has been marked unsolved")
 
     @challenge.command(aliases=['w', 'working'])
     async def start(self, ctx, name):
