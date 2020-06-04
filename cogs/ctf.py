@@ -77,6 +77,16 @@ class CTF(commands.Cog):
         member.save()
         return member
 
+    async def _add_category_channel(self, ctx, ctf, category):
+        ctf_category = ctx.bot.get_channel(ctf.category_id)
+        channel_name = f"{ctf.name}_{category}"
+
+        if not discord.utils.get(ctf_category.channels, name=channel_name):
+            tags = sorted(ctf.tags + [category])
+            position = tags.index(category) + len(default_channels)
+            channel = await ctf_category.create_text_channel(channel_name, position=position)
+            await ctx.send(f"Created new channel: {channel.mention}")
+
     async def prompt(self, ctx:commands.Context, message, timeout=10):
         await ctx.send(message)
         def check(message):
@@ -151,8 +161,7 @@ class CTF(commands.Cog):
 
         self._add_ctf_member(ctx.message.author, ctf)
 
-        all_channels = default_channels + ctf.tags
-        for channel in all_channels:
+        for channel in default_channels:
             channel_name = f'{ctf_name}_{channel}'
             if not discord.utils.get(category.channels, name=channel_name):
                 await category.create_text_channel(channel_name)
@@ -293,6 +302,9 @@ class CTF(commands.Cog):
             created_at=datetime.utcnow(),
         )
 
+        if category:
+            await self._add_category_channel(ctx, ctf, category)
+
         ctf.challenges.append(new_challenge)
         ctf.save()
 
@@ -338,16 +350,12 @@ class CTF(commands.Cog):
                 prompt = await self.prompt(ctx, message)
                 if str(prompt.content) == 'Y':
                     ctf.tags.append(category)
-                    ctf_category = ctx.bot.get_channel(ctf.category_id)
-                    tags = sorted(ctf.tags + [category])
-                    position = tags.index(category) + len(default_channels)
-                    channel_name = f'{ctf.name}_{category}'
-                    channel = await ctf_category.create_text_channel(channel_name, position=position)
-                    await ctx.send(f"Created new channel: {channel.mention}")
                 else:
                     raise Exception("Tag creation cancelled")
             except asyncio.TimeoutError:
                 raise Exception("Tag creation cancelled")
+
+        await self._add_category_channel(ctx, ctf, category)
 
         if not category in challenge.tags:
             challenge.tags.append(category)
@@ -490,16 +498,16 @@ class CTF(commands.Cog):
         """
         ctf = self._get_ctf(ctx)
 
+        public = False
+        if category and '!' in category:
+            category = category.replace('!','')
+            public = True
+
         if not category:
             if isinstance(ctx.channel, discord.TextChannel):
                 category = ctx.channel.name.split(f'{ctf.name}_')[1]
             else:
                 category = 'all'
-
-        public = False
-        if '!' in category:
-            category = category.replace('!','')
-            public = True
 
         if category not in ctf.tags:
             category = 'all'
