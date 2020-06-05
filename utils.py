@@ -11,6 +11,7 @@ def chunkify(text, limit):
         else:
             chunks.append(chunk)
             chunk = line
+    chunks.append(chunk)
     return chunks
 
 NOTEBOOK_BASE_URI = "https://notes.status.im/"
