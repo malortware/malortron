@@ -2,11 +2,15 @@ import requests
 
 def chunkify(text, limit):
     chunks = []
-    while len(text) > limit:
-        idx = text.index("\n", limit)
-        chunks.append(text[:idx])
-        text = text[idx:]
-    chunks.append(text)
+    lines = text.splitlines()
+    chunk = ""
+    for line in lines:
+        line = f"{line}\n"
+        if len(chunk + line) < limit:
+            chunk += line
+        else:
+            chunks.append(chunk)
+            chunk = line
     return chunks
 
 NOTEBOOK_BASE_URI = "https://notes.status.im/"
