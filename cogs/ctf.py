@@ -105,7 +105,7 @@ class CTF(commands.Cog):
                 await channel.send(message)
 
         if public:
-            public_channel = discord.utils.get(ctf_category.guild.channels, name="general")
+            public_channel = discord.utils.get(ctf_category.guild.channels, name="hype")
             if public_channel:
                 await public_channel.send(f"{message} for {ctf.name} ctf")
 
