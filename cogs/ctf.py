@@ -376,7 +376,7 @@ class CTF(commands.Cog):
         if not category in challenge.tags:
             challenge.tags.append(category)
             ctf.save()
-            message = f"{ctx.author.mention} added `{category}` tag to `{challenge.name}`"
+            message = f"`{ctx.author.name}` added `{category}` tag to `{challenge.name}`"
             await self.announce(ctx, ctf, message, challenge.tags)
         else:
             await ctx.send(f"`{challenge.name}` already tagged with `{category}`")
@@ -392,7 +392,7 @@ class CTF(commands.Cog):
         if category in challenge.tags:
             challenge.tags.remove(category)
             ctf.save()
-            await ctx.send(f"{ctx.author.mention} removed `{category}` tag from `{challenge.name}`")
+            await ctx.send(f"`{ctx.author.name}` removed `{category}` tag from `{challenge.name}`")
         else:
             await ctx.send(f"`{challenge.name}` doesn't have tag `{category}`")
 
@@ -415,8 +415,8 @@ class CTF(commands.Cog):
         challenge.flag = flag
         ctf.save()
 
-        solvers_str = ", ".join([s.mention for s in solvers])
-        message = f":triangular_flag_on_post: `{challenge.name}` has been solved by {solvers_str}"
+        solvers_str = ", ".join([s.name for s in solvers])
+        message = f":triangular_flag_on_post: `{challenge.name}` has been solved by `{solvers_str}`"
         await self.announce(ctx, ctf, message, challenge.tags + ['general'], public=True)
 
     @challenge.command(aliases=['us'])
@@ -453,7 +453,7 @@ class CTF(commands.Cog):
                 challenge.attempted_by.append(user.name)
             ctf.save()
 
-        message = (f"{user.mention} is working on `{challenge.name}`!")
+        message = (f"`{user.name}` is working on `{challenge.name}`!")
         await self.announce(ctx, ctf, message, challenge.tags)
 
     @challenge.command(aliases=['down'])
@@ -470,7 +470,7 @@ class CTF(commands.Cog):
             challenge.working_on.remove(user.name)
             ctf.save()
 
-        message = (f"{user.mention} stopped working on `{challenge.name}`")
+        message = (f"`{user.name}` stopped working on `{challenge.name}`")
         await self.announce(ctx, ctf, message, challenge.tags)
 
     @challenge.command()
@@ -492,7 +492,7 @@ class CTF(commands.Cog):
 
         ctf.save()
 
-        message = (f"{user.mention} stopped working on `{', '.join(chal_names)}`")
+        message = (f"`{user.name}` stopped working on `{', '.join(chal_names)}`")
         self.announce(ctx, ctf, message, ['general'])
 
     @challenge.command(aliases=['r', 'rm', 'delete', 'd'])
@@ -550,7 +550,7 @@ class CTF(commands.Cog):
         if unsolved:
             desc += f'# unsolved\n{unsolved}'
 
-        for chunk in chunkify(desc, 2047):
+        for chunk in chunkify(desc, 1999):
             # emb = discord.Embed(title=f'{category} challenges', description=chunk, colour=4387968)
             # await ctx.message.author.send(embed=emb)
             if public:
