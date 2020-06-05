@@ -426,6 +426,35 @@ class CTF(commands.Cog):
         message = f":triangular_flag_on_post: `{challenge.name}` has been solved by `{solvers_str}`"
         await self.announce(ctx, ctf, message, challenge.tags + ['general'], public=True)
 
+    @challenge.command(aliases=['as'])
+    async def addsolve(self, ctx, name, flag):
+        """
+        Add and solve a challenge in one command.
+        """
+        ctf = self._get_ctf(ctx)
+        user = ctx.message.author
+
+        try:
+            challenge = ctf.get_challenge(name)
+            if challenge:
+                raise ItemExists(f"Challenge `{name}` already exists.")
+        except NotFound:
+            pass
+
+        challenge = Challenge(
+            name=name,
+            created_at=datetime.utcnow(),
+            solved_at=datetime.utcnow(),
+            solved_by=[user.name],
+            flag=flag
+        )
+
+        ctf.challenges.append(challenge)
+        ctf.save()
+
+        message = f":triangular_flag_on_post: `{challenge.name}` has been solved by `{user.name}`"
+        await self.announce(ctx, ctf, message, challenge.tags + ['general'], public=True)
+
     @challenge.command(aliases=['us'])
     async def unsolve(self, ctx, name):
         """
