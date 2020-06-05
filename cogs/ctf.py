@@ -554,9 +554,9 @@ class CTF(commands.Cog):
             # emb = discord.Embed(title=f'{category} challenges', description=chunk, colour=4387968)
             # await ctx.message.author.send(embed=emb)
             if public:
-                await ctx.send(f'```md\n{desc}```')
+                await ctx.send(f'```md\n{chunk}```')
             else:
-                await ctx.message.author.send(f'```md\n{desc}```')
+                await ctx.message.author.send(f'```md\n{chunk}```')
 
 def setup(bot):
     bot.add_cog(CTF(bot))
