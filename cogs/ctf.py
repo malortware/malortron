@@ -297,8 +297,8 @@ class CTF(commands.Cog):
         if ctx.invoked_subcommand is None:
             await ctx.send_help(ctx.command)
 
-    @challenge.command(aliases=["a"])
-    async def add(self, ctx: commands.Context, name, category):
+    @challenge.command(aliases=["a", "create"])
+    async def add(self, ctx: commands.Context, name, category=None):
         """
         Add a new challenge.
         """
@@ -309,6 +309,13 @@ class CTF(commands.Cog):
                 raise ItemExists(f"Challenge `{name}` already exists")
         except NotFound:
             pass
+
+        if not category:
+            if isinstance(ctx.channel, discord.TextChannel):
+                category = ctx.channel.name.split(f'{ctf.name}_')[1]
+
+        if category not in ctf.tags:
+            category = None
 
         new_challenge = Challenge(
             name=name,
