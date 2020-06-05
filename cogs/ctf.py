@@ -550,7 +550,7 @@ class CTF(commands.Cog):
         if unsolved:
             desc += f'# unsolved\n{unsolved}'
 
-        for chunk in chunkify(desc, 1999):
+        for chunk in chunkify(desc, 1980):
             # emb = discord.Embed(title=f'{category} challenges', description=chunk, colour=4387968)
             # await ctx.message.author.send(embed=emb)
             if public:
