@@ -348,15 +348,24 @@ class CTF(commands.Cog):
 
         # note_info = get_notebook_info(challenge.notebook_url)
         # note_desc = "\n\n".join(note_info['description'].split("  "))
-        note_desc = get_notebook_details(challenge.notebook_url)['content']
-        note_desc = f"```\n{note_desc[:200]}...```"
-        note_url = f":pencil: notes : {challenge.notebook_url}?both"
-        working = f":fire: working : {', '.join(challenge.working_on) or '--'}"
+        note_desc = f"```md\n# {challenge.name}```"
+        note_url = ":pencil: notes : *No notebook URL*"
 
+        if challenge.notebook_url:
+            note_desc = get_notebook_details(challenge.notebook_url)['content']
+            note_desc = f"```md\n{note_desc[:200]}...```"
+            note_url = f":pencil: notes: {challenge.notebook_url}?both"
+
+        attempts = f":snowflake: attempted by: `{', '.join(challenge.attempted_by) or '--'}`"
+        working = f":fire: working on: `{', '.join(challenge.working_on) or '--'}`"
+        solved_at = f"at {challenge.solved_at.strftime('%Y-%m-%d %H:%M:%S')} UTC" if challenge.solved_at else ""
+        solved = f":triangular_flag_on_post: solved by: `{', '.join(challenge.solved_by) or '--'}` {solved_at}"
+
+        info = f"{note_desc}\n{note_url}\n{attempts}\n{working}\n{solved}"
         if public:
-            await ctx.send(f"{note_desc}\n{note_url}\n{working}")
+            await ctx.send(info)
         else:
-            await ctx.message.author.send(f"{note_desc}\n{note_url}\n{working}")
+            await ctx.message.author.send(info)
 
     @challenge.command(aliases=["t"])
     async def tag(self, ctx: commands.Context, name, category):
