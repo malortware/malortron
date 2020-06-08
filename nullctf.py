@@ -48,7 +48,8 @@ async def request(ctx, feature):
     creator = await bot.fetch_user(config_vars.maintainer_id)
     authors_name = str(ctx.author)
     await creator.send(f''':pencil: {authors_name}: {feature}''')
-    await ctx.send(f''':pencil: Thanks! Submit "{feature}" pull request here https://github.com/malortware/NullCTF''')
+    await ctx.send(f''':pencil: Thanks! Submit "{feature}" request here {config_vars.github_repo}/issues/new?title={feature}''')
+    
 
 @bot.command()
 async def report(ctx, error_report):
