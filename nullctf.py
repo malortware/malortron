@@ -4,6 +4,7 @@ logging.basicConfig(level=logging.INFO)
 import discord
 from discord.ext.commands import Bot
 from discord.ext import commands
+from urllib.parse import quote
 
 import help_info
 import config_vars
@@ -46,18 +47,17 @@ async def on_command_error(ctx: commands.Context, error):
 async def request(ctx, feature):
     # Bot sends a dm to creator with the name of the user and their request.
     creator = await bot.fetch_user(config_vars.maintainer_id)
-    authors_name = str(ctx.author)
+    authors_name = ctx.author.name
     await creator.send(f''':pencil: {authors_name}: {feature}''')
-    await ctx.send(f''':pencil: Thanks! Submit "{feature}" request here {config_vars.github_repo}/issues/new?title={feature}''')
-    
+    await ctx.send(f''':pencil: Thanks! Submit request for `{feature}` here: {config_vars.github_repo}/issues/new?title={quote(feature)}''')
 
 @bot.command()
 async def report(ctx, error_report):
     # Bot sends a dm to creator with the name of the user and their report.
     creator = await bot.fetch_user(config_vars.maintainer_id)
-    authors_name = str(ctx.author)
+    authors_name = ctx.author.name
     await creator.send(f''':triangular_flag_on_post: {authors_name}: {error_report}''')
-    await ctx.send(f''':triangular_flag_on_post: Thanks for the help, "{error_report}" has been reported!''')
+    await ctx.send(f''':triangular_flag_on_post: Thanks for the help, please report `{error_report}` here: {config_vars.github_repo}/issues/new?title={quote(error_report)}''')
 
 @bot.command()
 async def amicool(ctx):
