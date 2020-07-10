@@ -22,6 +22,10 @@ async def on_ready():
     print("-------------------------------")
     await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="you.. >help"))
 
+@bot.command(name="_>", hidden=True)
+async def look(ctx):
+    await ctx.send("<_<")
+
 @bot.command()
 async def source(ctx):
     await ctx.send(config_vars.github_repo)
