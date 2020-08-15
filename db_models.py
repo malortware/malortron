@@ -121,9 +121,20 @@ class CTFModel(MongoModel):
             IndexModel([('guild_id', 1), ('category_id', 1)], unique=True)
         ]
 
+class InventoryItem(EmbeddedMongoModel):
+    name = fields.CharField(primary_key=True)
+    amount = fields.IntegerField()
 
 class User(MongoModel):
     user_id = fields.IntegerField(primary_key=True, required=True)
     name = fields.CharField(required=True)
     ctfs = fields.ListField(fields.ReferenceField(CTFModel, on_delete=fields.ReferenceField.PULL), default=[])
     current_ctf = fields.ReferenceField(CTFModel, blank=True, on_delete=fields.ReferenceField.NULLIFY)
+    inventory = fields.EmbeddedDocumentListField(InventoryItem, default=[], blank=True)
+    shots_given = fields.IntegerField(default=0)
+    shots_received = fields.IntegerField(default=0)
+    shots_available = fields.IntegerField(default=0)
+
+    def get_item(self, name):
+        item = next((item for item in self.inventory if item.name == name), None)
+        return item
