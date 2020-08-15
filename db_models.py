@@ -122,8 +122,8 @@ class CTFModel(MongoModel):
         ]
 
 class InventoryItem(EmbeddedMongoModel):
-    name = fields.CharField(primary_key=True)
-    amount = fields.IntegerField()
+    name = fields.CharField(required=True)
+    amount = fields.IntegerField(default=0)
 
 class User(MongoModel):
     user_id = fields.IntegerField(primary_key=True, required=True)
