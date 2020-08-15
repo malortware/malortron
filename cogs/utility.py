@@ -72,9 +72,17 @@ class Utility(commands.Cog):
 
     @commands.command()
     async def cewl(self, ctx: commands.Context, url, count: int = 100, word_len: str = "5-20", show_counts: bool = False):
+        if not url.startswith("http"):
+            url = f"https://{url}"
+
         body = urllib.request.urlopen(url).read()
         soup = BeautifulSoup(body, 'html.parser')
-        tokens = soup.find(id="bodyContent").get_text(" ", strip=True).lower().split(" ")
+
+        element = soup.find("body")
+        if "wikipedia.org" in url:
+            element = soup.find(id="bodyContent")
+
+        tokens = element.get_text(" ", strip=True).lower().split(" ")
         nonPunct = re.compile('.*[A-Za-z].*')
         raw_words = [w for w in tokens if nonPunct.match(w)]
         min_len, max_len = [int(n) for n in word_len.split("-")]
