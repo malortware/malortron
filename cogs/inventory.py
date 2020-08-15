@@ -14,19 +14,19 @@ matches = [
 
 async def update_inventory(user, item_name, amount):
     item = user.get_item(item_name)
-    if not item:
+    if not item and amount > 0:
         item = InventoryItem(
             name=item_name,
             amount=0
         )
         user.inventory.append(item)
 
-    if item.amount + amount < 0:
+    if not item or item.amount + amount < 0:
         raise Exception(f"You don't have enough {item_name} - aquire some shots of malort to be able to mint new items.")
-    else:
-        item.amount += amount
-        user.save()
-        return item.amount
+
+    item.amount += amount
+    user.save()
+    return item.amount
 
 async def default_handler(ctx, item, amount, from_user, to_users):
     await update_inventory(from_user, item, -(amount * len(to_users)))
