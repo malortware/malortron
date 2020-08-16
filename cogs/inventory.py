@@ -65,7 +65,7 @@ class Inventory(commands.Cog):
             return user
 
     @commands.command()
-    async def give(self, ctx, user: typing.Optional[discord.Member] = None, amount: typing.Union[int, str] = None, item: str = None):
+    async def give(self, ctx: commands.Context, user: typing.Optional[discord.Member] = None, amount: typing.Union[int, str] = None, item: str = None):
         mentions = [user.mention for user in ctx.message.mentions]
         if len(mentions) == 0:
             raise Exception("Nobody to give it to :(")
@@ -103,6 +103,16 @@ class Inventory(commands.Cog):
         mention_str = ', '.join(mentions)
         response =  f"{ctx.author.mention} gave {amount_str}{item_str} to {mention_str}"
         await ctx.send(response)
+
+        if(ctx.bot.user in ctx.message.mentions):
+            bot_user = self._get_user(ctx.bot.user)
+            num_members = len(ctx.message.channel.members)
+            if bot_user.shots_available >= num_members:
+                to_users = [self._get_user(user) for user in ctx.message.channel.members]
+                await give_shot(ctx, "malort", 1, bot_user, to_users)
+                bot_user.shots_available -= num_members
+                bot_user.save()
+                await ctx.send(f"{ctx.bot.user.mention} bought everyone in {ctx.message.channel.mention} a round of malort!")
 
     @commands.command()
     async def mint(self, ctx: commands.Context, amount: typing.Optional[int], item_name: str):
