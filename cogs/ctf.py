@@ -9,7 +9,7 @@ import asyncio
 from datetime import datetime
 sys.path.append("..")
 from db_models import User, CTFModel, Challenge
-from utils import chunkify, create_notebook, get_notebook_info, get_notebook_details
+from utils import chunkify
 from errors import NotFound, ItemExists
 
 CTF_MANAGER_ROLE = 'ctf_manager'
@@ -320,7 +320,6 @@ class CTF(commands.Cog):
         new_challenge = Challenge(
             name=name,
             tags=[category] if category != None else [],
-            notebook_url=create_notebook(f"# {name} challenge"),
             created_at=datetime.utcnow(),
         )
 
@@ -346,22 +345,15 @@ class CTF(commands.Cog):
 
         challenge = ctf.get_challenge(name)
 
-        # note_info = get_notebook_info(challenge.notebook_url)
-        # note_desc = "\n\n".join(note_info['description'].split("  "))
         note_desc = f"```md\n# {challenge.name}```"
         note_url = ":pencil: notes : *No notebook URL*"
-
-        if challenge.notebook_url:
-            note_desc = get_notebook_details(challenge.notebook_url)['content']
-            note_desc = f"```md\n{note_desc[:200]}...```"
-            note_url = f":pencil: notes: {challenge.notebook_url}?both"
 
         attempts = f":snowflake: attempted by: `{', '.join(challenge.attempted_by) or '--'}`"
         working = f":fire: working on: `{', '.join(challenge.working_on) or '--'}`"
         solved_at = f"at {challenge.solved_at.strftime('%Y-%m-%d %H:%M:%S')} UTC" if challenge.solved_at else ""
         solved = f":triangular_flag_on_post: solved by: `{', '.join(challenge.solved_by) or '--'}` {solved_at}"
 
-        info = f"{note_desc}\n{note_url}\n{attempts}\n{working}\n{solved}"
+        info = f"{note_desc}\n{attempts}\n{working}\n{solved}"
         if public:
             await ctx.send(info)
         else:
