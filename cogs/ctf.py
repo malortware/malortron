@@ -538,7 +538,7 @@ class CTF(commands.Cog):
         ctf.save()
 
         message = (f"`{user.name}` stopped working on `{', '.join(chal_names)}`")
-        self.announce(ctx, ctf, message, ['general'])
+        await self.announce(ctx, ctf, message, ['general'])
 
     @challenge.command(aliases=['r', 'rm', 'delete', 'd'])
     async def remove(self, ctx, name):
