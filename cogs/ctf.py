@@ -77,14 +77,18 @@ class CTF(commands.Cog):
         member.save()
         return member
 
-    async def _add_category_channel(self, ctx, ctf, category):
+    async def _add_category_channel(self, ctx, ctf, category, type = 'text'):
         ctf_category = ctx.bot.get_channel(ctf.category_id)
         channel_name = f"{ctf.name}_{category}"
 
         if not discord.utils.get(ctf_category.channels, name=channel_name):
             # tags = sorted(ctf.tags + [category])
             # position = tags.index(category) + len(default_channels)
-            channel = await ctf_category.create_text_channel(channel_name)
+            channel = None
+            if type == 'voice':
+                channel = await ctf_category.create_voice_channel(channel_name)
+            else:
+                channel = await ctf_category.create_text_channel(channel_name)
             await ctx.send(f"Created new channel: {channel.mention}")
 
     async def prompt(self, ctx:commands.Context, message, timeout=10):
@@ -260,6 +264,22 @@ class CTF(commands.Cog):
         if role:
             await user.remove_roles(role)
             await ctx.send(f"{user.mention} has left the {role.mention} team.")
+
+    @ctf.command(name='channel:text', aliases=['channel', 'text'])
+    async def channel_text(self, ctx, name):
+        """
+        Add a text channel to the ctf category.
+        """
+        ctf = self._get_ctf(ctx)
+        await self._add_category_channel(ctx, ctf, name)
+
+    @ctf.command(name='channel:voice', aliases=['voice', 'vox'])
+    async def channel_voice(self, ctx, name):
+        """
+        Add a voice channel to the ctf category.
+        """
+        ctf = self._get_ctf(ctx)
+        await self._add_category_channel(ctx, ctf, name, 'voice')
 
     @commands.command()
     async def setctf(self, ctx: commands.Context):
