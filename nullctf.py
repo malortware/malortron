@@ -26,6 +26,10 @@ async def on_ready():
 async def look(ctx):
     await ctx.send("<_<")
 
+@bot.command(name="reminder", hidden=True)
+async def reminder(ctx):
+    await ctx.send(":question: :question: :question: :question: :question: :question: :question: :question: :question: :question: :question:\n:question:   Did you try the dumb thing first?  :question:\n:question: :question: :question: :question: :question: :question: :question: :question: :question: :question: :question:")
+
 @bot.command()
 async def source(ctx):
     await ctx.send(config_vars.github_repo)
