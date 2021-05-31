@@ -2,17 +2,15 @@ import logging
 logging.basicConfig(level=logging.INFO)
 
 import discord
-from discord.ext.commands import Bot
 from discord.ext import commands
 from urllib.parse import quote
 
-import help_info
 import config_vars
 
 client = discord.Client()
 bot = commands.Bot(command_prefix=">")
 
-extensions = ['ctf', 'encoding', 'cipher', 'utility', 'inventory'] # 'ctftime', 'configuration',
+extensions = ['ctf', 'encoding', 'cipher', 'utility', 'inventory', 'secret'] # 'ctftime', 'configuration',
 cool_names = ['nullpxl', 'Yiggles', 'JohnHammond', 'voidUpdate', 'Michel Ney', 'theKidOfArcrania', 'l14ck3r0x01', 'hasu', 'KFBI', 'mrFu', 'warlock_rootx', 'd347h4ck'] 
 
 @bot.event

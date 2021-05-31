@@ -1,5 +1,4 @@
 import os
-from pymongo import MongoClient
 
 discord_token = os.environ.get("DISCORD_TOKEN")
 mongodb_connection = os.environ.get("MONGODB_URI", "mongodb://localhost/ctfteams")
