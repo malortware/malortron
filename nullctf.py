@@ -6,9 +6,11 @@ from discord.ext import commands
 from urllib.parse import quote
 
 import config_vars
+import healthcheck
 
 client = discord.Client()
 bot = commands.Bot(command_prefix=">")
+healthcheck.start(bot, port=config_vars.port)
 
 extensions = ['ctf', 'encoding', 'cipher', 'utility', 'inventory', 'secret'] # 'ctftime', 'configuration',
 cool_names = ['nullpxl', 'Yiggles', 'JohnHammond', 'voidUpdate', 'Michel Ney', 'theKidOfArcrania', 'l14ck3r0x01', 'hasu', 'KFBI', 'mrFu', 'warlock_rootx', 'd347h4ck'] 
