@@ -36,7 +36,7 @@ def start(
     Returns:
         asyncio.base_events.Server: The Server object for the healthcheck server
     """
-    host = "127.0.0.1"
+    host = "0.0.0.0"
     ctx = _ClientContext(client, bot_max_latency)
 
     # app = Sanic('healthcheck')
