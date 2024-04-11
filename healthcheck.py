@@ -1,17 +1,15 @@
 import asyncio
 import discord
+from aiohttp import web
 
-class _ClientContext:
-    """A simple class to keep context for the client handler function"""
-
-    def __init__(self, client: discord.client, bot_max_latency: float):
+class HealthCheck():
+        
+    def __init__(self, client: discord.client, bot_max_latency: float = 0.5):
         self.client = client
         self.bot_max_latency = bot_max_latency
-
-    def handle_socket_client(
-        self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter
-    ) -> None:
-        message = b"healthy"
+    
+    def handle_health(self, request: web.Request):
+        status = "healthy"
 
         if (
             self.client.latency > self.bot_max_latency  # Latency too high
@@ -19,10 +17,27 @@ class _ClientContext:
             or not self.client.is_ready()  # Client’s internal cache not ready
             or self.client.is_closed()  # The websocket connection is closed
         ):
-            message = b"unhealthy"
+            status = "unhealthy"
 
-        writer.write(message)
-        writer.close()
+        return web.json_response({
+            "status": status,
+            "latency": self.client.latency,
+        }, status = 200 if status == "healthy" else 500)
+
+    async def serve(self, host: str = "localhost", port: int = 8080):
+        app = web.Application()
+        app.router.add_get('/health', self.handle_health)
+
+        runner = web.AppRunner(app)
+
+        # async def on_shutdown(app):
+        #     asyncio.ensure_future(runner.cleanup())
+
+        # app.on_shutdown.append(on_shutdown)
+
+        await runner.setup()
+        site = web.TCPSite(runner, host, port)
+        await site.start()
 
 def start(
     client: discord.client, port: int = 8080, bot_max_latency: float = 0.5
@@ -37,11 +52,6 @@ def start(
         asyncio.base_events.Server: The Server object for the healthcheck server
     """
     host = "0.0.0.0"
-    ctx = _ClientContext(client, bot_max_latency)
+    health_check = HealthCheck(client, bot_max_latency)
 
-    # app = Sanic('healthcheck')
-    # app.add_route(HealthCheck(client, bot_max_latency).as_view(), '/health')
-
-    return client.loop.run_until_complete(
-      asyncio.start_server(ctx.handle_socket_client, host, port)
-    )
+    return client.loop.create_task(health_check.serve(host, port))
