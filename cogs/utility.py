@@ -99,5 +99,5 @@ class Utility(commands.Cog):
         results = "\n".join(f"{word} - {count}" if show_counts else word for word, count in results)
         await ctx.send(f'```\n{results}```')
 
-def setup(bot):
-    bot.add_cog(Utility(bot))
+async def setup(bot):
+    await bot.add_cog(Utility(bot))

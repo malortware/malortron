@@ -4,7 +4,7 @@ from aiohttp import web
 
 class HealthCheck():
         
-    def __init__(self, client: discord.client, bot_max_latency: float = 0.5):
+    def __init__(self, client: discord.Client, bot_max_latency: float = 0.5):
         self.client = client
         self.bot_max_latency = bot_max_latency
     
@@ -39,8 +39,8 @@ class HealthCheck():
         site = web.TCPSite(runner, host, port)
         await site.start()
 
-def start(
-    client: discord.client, port: int = 8080, bot_max_latency: float = 0.5
+async def start(
+    client: discord.Client, port: int = 8080, bot_max_latency: float = 0.5
 ) -> asyncio.base_events.Server:
     """Starts the health check server.
     Args:

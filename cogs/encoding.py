@@ -77,5 +77,5 @@ class Encoding(commands.Cog):
         if encode_or_decode == 'encode':
             await ctx.send(urllib.parse.quote(message))
 
-def setup(bot):
-    bot.add_cog(Encoding(bot))
+async def setup(bot):
+    await bot.add_cog(Encoding(bot))

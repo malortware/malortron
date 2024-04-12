@@ -1,82 +1,63 @@
 import logging
 logging.basicConfig(level=logging.INFO)
 
+import asyncio
 import discord
 from discord.ext import commands
-from urllib.parse import quote
+from typing import List
 
 import config_vars
 import healthcheck
 
-client = discord.Client()
-bot = commands.Bot(command_prefix=">")
-healthcheck.start(bot, port=config_vars.port)
+class MalortronBot(commands.Bot):
+    def __init__(
+        self,
+        *args,
+        extensions: List[str],
+        **kwargs,
+    ):
+        super().__init__(*args, **kwargs)
+        self.initial_extensions = extensions
 
-extensions = ['ctf', 'encoding', 'cipher', 'utility', 'inventory', 'secret'] # 'ctftime', 'configuration',
-cool_names = ['nullpxl', 'Yiggles', 'JohnHammond', 'voidUpdate', 'Michel Ney', 'theKidOfArcrania', 'l14ck3r0x01', 'hasu', 'KFBI', 'mrFu', 'warlock_rootx', 'd347h4ck'] 
+    async def setup_hook(self):
+        for extension in self.initial_extensions:
+            await self.load_extension('cogs.' + extension)
+        await self.tree.sync()
+        await healthcheck.start(self, port=config_vars.port)
+    
+    async def on_ready(self):
+        print(f"{self.user.name} - Online")
+        print(f"discord.py {discord.__version__}\n")
+        print("-------------------------------")
+        await self.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="you.. >help"))
 
-@bot.event
-async def on_ready():
-    print(f"{bot.user.name} - Online")
-    print(f"discord.py {discord.__version__}\n")
-    print("-------------------------------")
-    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="you.. >help"))
+    async def on_command_error(self, ctx: commands.Context, error: commands.CommandError):
+        if isinstance(error, commands.UserInputError):
+            await ctx.send_help(ctx.command)
+        # elif isinstance(error, commands.MissingPermissions):
+        #     await ctx.send("You do not have the appropriate permissions to run this command.")
+        # elif isinstance(error, commands.BotMissingPermissions):
+        #     await ctx.send("I don't have sufficient permissions!")
+        # elif isinstance(error, commands.MissingRole):
+        #     await ctx.send("You don't have the appropriate role to run this command")
+        else:
+            try:
+                error = error.original
+            except AttributeError:
+                pass
+            await ctx.send(error)
 
-@bot.command(name="_>", hidden=True)
-async def look(ctx):
-    await ctx.send("<_<")
+async def main():
+    # logger = logging.getLogger('discord')
+    # logger.setLevel(logging.INFO)
 
-@bot.command(name="reminder", hidden=True)
-async def reminder(ctx):
-    await ctx.send(":question: :question: :question: :question: :question: :question: :question: :question: :question: :question: :question:\n:question:   Did you try the dumb thing first?  :question:\n:question: :question: :question: :question: :question: :question: :question: :question: :question: :question: :question:")
+    intents = discord.Intents.default()
+    intents.message_content = True
 
-@bot.command()
-async def source(ctx):
-    await ctx.send(config_vars.github_repo)
+    extensions = ['ctf', 'encoding', 'cipher', 'utility', 'inventory', 'secret', 'misc']
 
-@bot.event
-async def on_command_error(ctx: commands.Context, error):
-    if isinstance(error, commands.UserInputError):
-        await ctx.send_help(ctx.command)
-    # elif isinstance(error, commands.MissingPermissions):
-    #     await ctx.send("You do not have the appropriate permissions to run this command.")
-    # elif isinstance(error, commands.BotMissingPermissions):
-    #     await ctx.send("I don't have sufficient permissions!")
-    # elif isinstance(error, commands.MissingRole):
-    #     await ctx.send("You don't have the appropriate role to run this command")
-    else:
-        try:
-            error = error.original
-        except AttributeError:
-            pass
-        await ctx.send(error)
-
-@bot.command()
-async def request(ctx, feature):
-    # Bot sends a dm to creator with the name of the user and their request.
-    creator = await bot.fetch_user(config_vars.maintainer_id)
-    authors_name = ctx.author.name
-    await creator.send(f''':pencil: {authors_name}: {feature}''')
-    await ctx.send(f''':pencil: Thanks! Submit request for `{feature}` here: {config_vars.github_repo}/issues/new?title={quote(feature)}''')
-
-@bot.command()
-async def report(ctx, error_report):
-    # Bot sends a dm to creator with the name of the user and their report.
-    creator = await bot.fetch_user(config_vars.maintainer_id)
-    authors_name = ctx.author.name
-    await creator.send(f''':triangular_flag_on_post: {authors_name}: {error_report}''')
-    await ctx.send(f''':triangular_flag_on_post: Thanks for the help, please report `{error_report}` here: {config_vars.github_repo}/issues/new?title={quote(error_report)}''')
-
-@bot.command()
-async def amicool(ctx):
-    authors_name = str(ctx.author).split("#")[0]
-    if authors_name in cool_names:
-        await ctx.send('You are very cool :]')
-    else:
-        await ctx.send('lolno')
-        await ctx.send('Psst, kid.  Want to be cool?  Find an issue and report it or request a feature!')
+    bot = MalortronBot(command_prefix=">", intents=intents, extensions=extensions)
+    await bot.start(config_vars.discord_token)
 
 if __name__ == '__main__':
-    for extension in extensions:
-        bot.load_extension('cogs.' + extension)
-    bot.run(config_vars.discord_token)
+    asyncio.run(main())

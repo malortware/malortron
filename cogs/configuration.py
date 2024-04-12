@@ -48,5 +48,5 @@ class Configuration(commands.Cog):
         await ctx.send(f"Archive category set as `{categoryset}`")
 
 
-def setup(bot):
-    bot.add_cog(Configuration(bot))
+async def setup(bot):
+    await bot.add_cog(Configuration(bot))

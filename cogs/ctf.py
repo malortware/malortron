@@ -615,5 +615,5 @@ class CTF(commands.Cog):
             else:
                 await ctx.message.author.send(f'```md\n{chunk}```')
 
-def setup(bot):
-    bot.add_cog(CTF(bot))
+async def setup(bot):
+    await bot.add_cog(CTF(bot))

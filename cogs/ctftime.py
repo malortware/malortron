@@ -258,5 +258,5 @@ class CtfTime(commands.Cog):
                 
                 await ctx.send(f"```ini\n{self.upcoming_l[x]['name']} starts in: [{days} days], [{hours} hours], [{minutes} minutes], [{seconds} seconds]```\n{self.upcoming_l[x]['url']}")
 
-def setup(bot):
-    bot.add_cog(CtfTime(bot))
+async def setup(bot):
+    await bot.add_cog(CtfTime(bot))

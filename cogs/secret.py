@@ -105,5 +105,5 @@ class Secret(commands.Cog):
         except SecretChallenge.DoesNotExist:
             await ctx.send("Sorry, thats not right...")
 
-def setup(bot):
-    bot.add_cog(Secret(bot))
+async def setup(bot):
+    await bot.add_cog(Secret(bot))
