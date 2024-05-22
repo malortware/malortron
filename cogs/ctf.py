@@ -445,7 +445,7 @@ class CTF(commands.Cog):
 
         solvers_str = ", ".join([s.name for s in solvers])
         message = f":triangular_flag_on_post: `{challenge.name}` has been solved by `{solvers_str}`"
-        await self.announce(ctx, ctf, message, challenge.tags + ['general'], public=True)
+        await self.announce(ctx, ctf, message, challenge.tags + ['hype'], public=True)
 
     @challenge.command(aliases=['as'])
     async def addsolve(self, ctx, name, flag):
@@ -474,7 +474,7 @@ class CTF(commands.Cog):
         ctf.save()
 
         message = f":triangular_flag_on_post: `{challenge.name}` has been solved by `{user.name}`"
-        await self.announce(ctx, ctf, message, challenge.tags + ['general'], public=True)
+        await self.announce(ctx, ctf, message, challenge.tags + ['hype'], public=True)
 
     @challenge.command(aliases=['us'])
     async def unsolve(self, ctx, name):
