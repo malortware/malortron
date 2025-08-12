@@ -1,12 +1,9 @@
-import collections
-import string
 import urllib.parse
 import urllib.request
 import random
 import re
 import operator
 import json
-import discord
 from discord.ext import commands
 from collections import Counter
 from bs4 import BeautifulSoup

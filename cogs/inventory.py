@@ -1,7 +1,7 @@
 import typing
 import re
 import discord
-from discord.ext import tasks, commands
+from discord.ext import commands
 from db_models import User, InventoryItem
 
 item_map = {

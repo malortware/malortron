@@ -1,13 +1,8 @@
 import discord
-from discord.ext import tasks, commands
+from discord.ext import commands
 import string
-import json
-import requests
-import sys
-import traceback
 import asyncio
 from datetime import datetime
-sys.path.append("..")
 from db_models import User, CTFModel, Challenge
 from utils import chunkify
 from errors import NotFound, ItemExists
@@ -161,7 +156,7 @@ class CTF(commands.Cog):
 
         category = discord.utils.get(ctx.guild.categories, name=ctf_name)
         if category == None: # Checks if category exists, if it doesn't it will create it.
-            category = await ctx.guild.create_category(name=ctf_name, overwrites=overwrites)
+            category = await ctx.guild.create_category(name=ctf_name, overwrites=overwrites, position=1)
         else:
             # await category.edit(overwrites=overwrites) # this does not work?
             for target, overwrite in overwrites.items():
