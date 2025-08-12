@@ -8,6 +8,7 @@ from utils import chunkify
 from errors import NotFound, ItemExists
 
 CTF_MANAGER_ROLE = 'ctf_manager'
+VERIFIED_ROLE = 'verified'
 
 def strip_string(tostrip, whitelist):
     # for discord channel creation
@@ -16,7 +17,6 @@ def strip_string(tostrip, whitelist):
 
 default_channels = [
     'general',
-    'bios',
     'scheds',
     'infra',
 ]
@@ -106,7 +106,7 @@ class CTF(commands.Cog):
         if public:
             public_channel = discord.utils.get(ctf_category.guild.channels, name="hype")
             if public_channel:
-                await public_channel.send(f"{message} for {ctf.name} ctf")
+                await public_channel.send(message)
 
     @commands.Cog.listener()
     @commands.bot_has_permissions(manage_roles=True)
@@ -208,29 +208,29 @@ class CTF(commands.Cog):
 
         await ctx.send(f"`{ctf.name}` ctf deleted from database")
 
-    # @ctf.command()
-    # async def archive(self, ctx):
-    #     role = discord.utils.get(ctx.guild.roles, name=str(ctx.message.channel))
-    #     await role.delete()
-    #     await ctx.send(f"`{role.name}` role deleted, archiving channel.")
-    #     try:
-    #         sconf = serverdb[str(ctx.guild.id) + '-CONF'] # put this in a try/except, if it doesn't exist set default to CTF
-    #         servarchive = sconf.find_one({'name': "archive_category_name"})['archive_category']
-    #     except:
-    #         servarchive = "ARCHIVE"
+    @ctf.command()
+    async def archive(self, ctx: commands.Context, *, note: str = ''):
+        """
+        Archive CTF and allow verified users to view.
+        """
+        # print([(x.guild_id, x.name) for x in CTFModel.objects.all()])
+        ctf = self._get_ctf(ctx)
 
-    #     category = discord.utils.get(ctx.guild.categories, name=servarchive)
-    #     if category == None: # Checks if category exists, if it doesn't it will create it.
-    #         await ctx.guild.create_category(name=servarchive)
-    #         category = discord.utils.get(ctx.guild.categories, name=servarchive)
-    #     await ctx.message.channel.edit(syncpermissoins=True, category=category)
-        
-#     @ctf.command()
-#     async def end(self, ctx):
-#         await ctx.send("You can now use either `>ctf delete` (which will delete all data), or `>ctf archive/over` \
-# which will move the channel and delete the role, but retain challenge info(`>config archive_category \
-# \"archive category\"` to specify where to archive.")
-    
+        verified_role = discord.utils.get(ctx.guild.roles, name=VERIFIED_ROLE)
+        role = discord.utils.get(ctx.guild.roles, id=ctf.role_id)
+
+        overwrites = {
+            verified_role: discord.PermissionOverwrite(read_messages=True)
+        }
+
+        await ctx.channel.category.edit(overwrites=overwrites)
+
+        message = f"Archived {role.mention}"
+        if note:
+            message += f"\n> {note}"
+
+        await self.announce(ctx, ctf, message, [], public=True)
+
     @ctf.command(name='invite')
     async def invite_user(self, ctx, users: commands.Greedy[discord.Member]):
         """
