@@ -219,11 +219,14 @@ class CTF(commands.Cog):
         verified_role = discord.utils.get(ctx.guild.roles, name=VERIFIED_ROLE)
         role = discord.utils.get(ctx.guild.roles, id=ctf.role_id)
 
-        overwrites = {
-            verified_role: discord.PermissionOverwrite(read_messages=True)
-        }
+        category: discord.CategoryChannel = discord.utils.get(ctx.guild.categories, id=ctf.category_id)
 
-        await ctx.channel.category.edit(overwrites=overwrites)
+        new_overwrites = category.overwrites
+        new_overwrites.update({
+            verified_role: discord.PermissionOverwrite(read_messages=True)
+        })
+
+        await category.edit(overwrites=new_overwrites, sync_permissions=True)
 
         message = f"Archived {role.mention}"
         if note:
