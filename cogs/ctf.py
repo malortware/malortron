@@ -226,7 +226,9 @@ class CTF(commands.Cog):
             verified_role: discord.PermissionOverwrite(read_messages=True)
         })
 
-        await category.edit(overwrites=new_overwrites, sync_permissions=True)
+        await category.edit(overwrites=new_overwrites)
+        for chan in category.channels:
+            await chan.edit(sync_permissions=True)
 
         message = f"Archived {role.mention}"
         if note:
