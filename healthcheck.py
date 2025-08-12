@@ -40,18 +40,19 @@ class HealthCheck():
         await site.start()
 
 async def start(
-    client: discord.Client, port: int = 8080, bot_max_latency: float = 0.5
+    client: discord.Client, host = "0.0.0.0", port: int = 8080, bot_max_latency: float = 0.5
 ) -> asyncio.base_events.Server:
     """Starts the health check server.
     Args:
         client: The discord.py client object to monitor
+        host: The host interface to bind to
         port: The port to bind the TCP socket server to
         bot_max_latency: The maximum acceptable latency (in seconds) for the bots
             connection to Discord
     Returns:
         asyncio.base_events.Server: The Server object for the healthcheck server
     """
-    host = "0.0.0.0"
+
     health_check = HealthCheck(client, bot_max_latency)
 
     return client.loop.create_task(health_check.serve(host, port))
